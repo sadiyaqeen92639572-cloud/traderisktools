@@ -1,0 +1,22 @@
+{
+  "last_updated": "2026-08-22",
+  "note": "Swappable prop-firm affiliate list. Edit this file only to add/remove/reorder firms — do not hardcode a firm name into any page template. Given 80+ prop-firm closures 2023-2026, treat this list as short-lived and review quarterly.",
+  "providers": [
+    {
+      "id": "placeholder-1",
+      "name": "Prop Firm A (placeholder)",
+      "logo": "/assets/placeholder-logo.svg",
+      "url": "https://example.com/ref/placeholder-1",
+      "blurb": "Placeholder — replace with a real affiliate program before launch.",
+      "active": false
+    },
+    {
+      "id": "placeholder-2",
+      "name": "Prop Firm B (placeholder)",
+      "logo": "/assets/placeholder-logo.svg",
+      "url": "https://example.com/ref/placeholder-2",
+      "blurb": "Placeholder — replace with a real affiliate program before launch.",
+      "active": false
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About TradeRiskTools</title>
+<meta name="description" content="Who publishes TradeRiskTools, how our calculators are built and checked, and where our contract data comes from.">
+<link rel="canonical" href="https://traderisktools.com/about/">
+<meta property="og:title" content="About TradeRiskTools">
+<meta property="og:description" content="Who publishes TradeRiskTools, how our calculators are built and checked, and where our contract data comes from.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://traderisktools.com/about/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"AboutPage","url":"https://traderisktools.com/about/","name":"About TradeRiskTools","publisher":{"@type":"Organization","name":"TradeRiskTools","legalName":"Gesmine-Invest Limited","identifier":{"@type":"PropertyValue","propertyID":"UK Company Number","value":"14120136"},"address":{"@type":"PostalAddress","streetAddress":"Hardy House, 269 Poynders Gardens","addressLocality":"London","postalCode":"SW4 8PQ","addressCountry":"GB"}}},{"@type":"Organization","name":"TradeRiskTools","legalName":"Gesmine-Invest Limited","identifier":{"@type":"PropertyValue","propertyID":"UK Company Number","value":"14120136"},"address":{"@type":"PostalAddress","streetAddress":"Hardy House, 269 Poynders Gardens","addressLocality":"London","postalCode":"SW4 8PQ","addressCountry":"GB"}}]}</script>
+</head>
+<body>
+<header>
+<a href="/">TradeRiskTools</a>
+<nav class="site-nav"><a href="/">Position Size</a> · <a href="/futures-calculator/">Futures Calculator</a></nav>
+<h1>About</h1>
+<p></p>
+<p class="reviewed-badge">Last reviewed 2026-08-22</p>
+</header>
+<nav class="crumbs"><a href="/">Home</a> / About</nav>
+<main>
+
+<section>
+<h2>About TradeRiskTools</h2>
+<p>TradeRiskTools is published by Gesmine-Invest Limited, registered UK company number 14120136, registered office at Hardy House, 269 Poynders Gardens, London, United Kingdom, SW4 8PQ. It provides free calculators for position sizing, futures P&amp;L, and futures contract tick values, aimed at retail and prop-firm funded traders.</p>
+<h3>How the math is built and checked</h3>
+<p>Every formula on this site is deterministic arithmetic given its inputs — not an AI model, not an estimate dressed up as one. The tick/point/position-size engine (<code>assets/calc-engine.js</code>) was verified before launch by hand-computing expected results for two contracts with very different scale (MNQ: $2.00 per point; ES: $50.00 per point) and checking the calculator matches in both the tick-based and point-based query direction — the error class where a tick/point mixup silently makes every figure on the site wrong by the same fixed multiple. Position-size math was checked the same way for stock and futures asset types against hand-computed expected values.</p>
+<h3>Sourcing methodology</h3>
+<p>Futures contract specs (tick size, tick value, point value) in <a href="/#contract-specs">the tick-value pages</a> are sourced directly from CME Group contract specifications, verified on 2026-08-22 — not from memory, and not copied from another site's numbers. Wave 1 covers the micro/mini index contracts (ES, MES, NQ, MNQ, YM, MYM, RTY, M2K) most commonly allowed on prop-firm funded platforms; additional contracts will be added and sourced the same way.</p>
+<h3>What this site deliberately avoids</h3>
+<p>No day-trading tax or wash-sale calculator — that's YMYL tax content, and this is a brand-new domain with no track record yet to support giving tax guidance responsibly. No pip/lot-size/margin calculator — that SERP is occupied by broker-native tools with a structural incentive to keep traffic on their own platform, not a fair fight for a third-party calculator regardless of how good the tool is.</p>
+<h3>Affiliate disclosure</h3>
+<p>Some links on this site may be affiliate links to prop-firm evaluation programs, meaning we may earn a fee if you're referred to a partner. This does not affect the numbers any calculator on this site produces.</p>
+<p>We are not a broker, not a prop firm, and not a registered investment adviser. Calculators here provide estimates for informational purposes only — always confirm numbers against your actual broker/platform statement.</p>
+</section>
+</main>
+<footer>
+<div class="footer-groups">
+<div>
+<p class="footer-heading">Calculators</p>
+<ul>
+<li><a href="/">Position Size Calculator</a></li>
+<li><a href="/futures-calculator/">Futures Calculator</a></li>
+</ul>
+</div>
+<div>
+<p class="footer-heading">Futures contract specs</p>
+<ul>
+<li><a href="/tick-value/es/">ES Tick Value</a></li>
+<li><a href="/tick-value/mes/">MES Tick Value</a></li>
+<li><a href="/tick-value/nq/">NQ Tick Value</a></li>
+<li><a href="/tick-value/mnq/">MNQ Tick Value</a></li>
+<li><a href="/tick-value/ym/">YM Tick Value</a></li>
+<li><a href="/tick-value/mym/">MYM Tick Value</a></li>
+<li><a href="/tick-value/rty/">RTY Tick Value</a></li>
+<li><a href="/tick-value/m2k/">M2K Tick Value</a></li>
+</ul>
+</div>
+<div>
+<p class="footer-heading">Site</p>
+<ul>
+<li><a href="/about/">About &amp; methodology</a></li>
+<li><a href="/privacy/">Privacy</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+</ul>
+</div>
+</div>
+<p class="footer-legal">TradeRiskTools is published by Gesmine-Invest Limited, registered UK company number 14120136, registered office at Hardy House, 269 Poynders Gardens, London, United Kingdom, SW4 8PQ. &copy; 2026 TradeRiskTools. Estimates only — not trading or financial advice.</p>
+</footer>
+<script src="/assets/calc-engine.js"></script>
+<script src="/assets/affiliate-widget.js"></script>
+</body>
+</html>

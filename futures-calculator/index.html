@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Futures Calculator — P&L by Contract, Entry & Exit Price</title>
+<meta name="description" content="Free futures profit/loss calculator. Pick your contract (ES, MES, NQ, MNQ, YM, MYM, RTY, M2K), enter entry/exit price and contract count, get exact P&L.">
+<link rel="canonical" href="https://traderisktools.com/futures-calculator/">
+<meta property="og:title" content="Futures Calculator — P&L by Contract, Entry & Exit Price">
+<meta property="og:description" content="Free futures profit/loss calculator. Pick your contract (ES, MES, NQ, MNQ, YM, MYM, RTY, M2K), enter entry/exit price and contract count, get exact P&L.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://traderisktools.com/futures-calculator/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"dateModified":"2026-08-22","author":{"@type":"Organization","name":"TradeRiskTools","legalName":"Gesmine-Invest Limited","identifier":{"@type":"PropertyValue","propertyID":"UK Company Number","value":"14120136"},"address":{"@type":"PostalAddress","streetAddress":"Hardy House, 269 Poynders Gardens","addressLocality":"London","postalCode":"SW4 8PQ","addressCountry":"GB"}},"publisher":{"@type":"Organization","name":"TradeRiskTools","legalName":"Gesmine-Invest Limited","identifier":{"@type":"PropertyValue","propertyID":"UK Company Number","value":"14120136"},"address":{"@type":"PostalAddress","streetAddress":"Hardy House, 269 Poynders Gardens","addressLocality":"London","postalCode":"SW4 8PQ","addressCountry":"GB"}},"version":"2026-08-v1","name":"Futures Calculator","description":"Calculates profit/loss on a futures trade from entry price, exit price, and number of contracts, using exchange contract specs."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do you calculate futures profit and loss?","acceptedAnswer":{"@type":"Answer","text":"P&L = (exit price − entry price) ÷ tick size × tick value × number of contracts. Each contract has a fixed exchange-set tick value — it isn't proportional to the index price, so you can't estimate futures P&L the way you would a stock percentage move."}},{"@type":"Question","name":"What is the difference between tick value and point value?","acceptedAnswer":{"@type":"Answer","text":"Tick value is the dollar amount for one minimum price increment (tick). Point value is the dollar amount for one full index point of movement — point value = tick value ÷ tick size in points. For MNQ: tick size 0.25pt, tick value $0.50, so point value = $0.50 ÷ 0.25 = $2.00 per point."}}]},{"@type":"HowTo","name":"How to calculate futures P&L","description":"Pick your contract, enter entry price, exit price, and number of contracts, and read the profit/loss in dollars.","step":[{"@type":"HowToStep","position":1,"name":"Pick your contract","text":"Select the futures symbol (ES, MES, NQ, MNQ, YM, MYM, RTY, or M2K) from the dropdown."},{"@type":"HowToStep","position":2,"name":"Enter entry and exit price","text":"Enter the price you entered the trade at and the price you exited (or plan to exit) at, in index points."},{"@type":"HowToStep","position":3,"name":"Enter number of contracts","text":"Enter how many contracts of that symbol you traded."},{"@type":"HowToStep","position":4,"name":"Read the P&L","text":"The calculator converts the price move into ticks, multiplies by the exchange tick value, and totals across your contracts."}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://traderisktools.com/"},{"@type":"ListItem","position":2,"name":"Futures Calculator","item":"https://traderisktools.com/futures-calculator/"}]},{"@type":"Organization","name":"TradeRiskTools","legalName":"Gesmine-Invest Limited","identifier":{"@type":"PropertyValue","propertyID":"UK Company Number","value":"14120136"},"address":{"@type":"PostalAddress","streetAddress":"Hardy House, 269 Poynders Gardens","addressLocality":"London","postalCode":"SW4 8PQ","addressCountry":"GB"}}]}</script>
+</head>
+<body>
+<header>
+<a href="/">TradeRiskTools</a>
+<nav class="site-nav"><a href="/">Position Size</a> · <a href="/futures-calculator/">Futures Calculator</a></nav>
+<h1>Futures Calculator</h1>
+<p>P&L by contract, using real exchange tick values.</p>
+<p class="reviewed-badge">Last reviewed 2026-08-22</p>
+</header>
+<nav class="crumbs"><a href="/">Home</a> / Futures Calculator</nav>
+<main>
+
+<div class="disclaimer-banner">Estimates only — futures point values are fixed by the exchange (CME); this is not trading or financial advice.</div>
+<form id="calc-form">
+  <label>Contract
+    <select id="futuresSymbol"></select>
+  </label>
+  <p class="privacy-note" id="futuresSpecNote"></p>
+  <label>Entry price (index points) <input type="number" id="entryPrice" value="20000" step="0.25"></label>
+  <label>Exit price (index points) <input type="number" id="exitPrice" value="20050" step="0.25"></label>
+  <label>Number of contracts <input type="number" id="numContracts" value="1" min="1" step="1"></label>
+  <button type="submit" class="submit-btn">Calculate P&amp;L</button>
+</form>
+<div id="results-block">
+  <div class="result-amount" id="r-total">$0</div>
+  <div class="result-row"><span>Price move (points)</span><span id="r-move">0</span></div>
+  <div class="result-row"><span>Ticks</span><span id="r-ticks">0</span></div>
+  <div class="result-row"><span>Per-contract P&amp;L</span><span id="r-percontract">$0</span></div>
+</div>
+<section>
+<h2>Want position sizing instead?</h2>
+<p>This tool calculates P&amp;L on a trade you've already planned. To figure out how many contracts to trade in the first place based on your account size and risk tolerance, use the <a href="/">position size calculator</a> — it has a futures mode with the same contract specs.</p>
+</section>
+<section id="affiliate-widget"></section>
+<section class="formula-section">
+<h2>How this calculator works</h2>
+<p class="source-line">Deterministic math — no AI, no estimation model. Formulas below.</p>
+<div class="formula-code">
+price_move = exit_price − entry_price<br>
+ticks = price_move ÷ tick_size_points<br>
+pnl_per_contract = ticks × tick_value_usd<br>
+total_pnl = pnl_per_contract × num_contracts
+</div>
+<p class="formula-footnote">Tick size and tick value per contract are fixed by the exchange (CME) — see the <a href="/#contract-specs">contract specs table</a> for each Wave-1 symbol.</p>
+</section>
+<section>
+<h2>FAQ</h2>
+<h3>How do you calculate futures profit and loss?</h3>
+<p>P&amp;L = (exit price − entry price) ÷ tick size × tick value × number of contracts. Each contract has a fixed exchange-set tick value — it isn't proportional to the index price, so you can't estimate futures P&amp;L the way you would a stock percentage move.</p>
+<h3>What is the difference between tick value and point value?</h3>
+<p>Tick value is the dollar amount for one minimum price increment (tick). Point value is the dollar amount for one full index point of movement — point value = tick value ÷ tick size in points. For MNQ: tick size 0.25pt, tick value $0.50, so point value = $0.50 ÷ 0.25 = $2.00 per point.</p>
+</section>
+<script>
+let futuresContracts = [];
+const fSymbolSelect = document.getElementById('futuresSymbol');
+const fSpecNote = document.getElementById('futuresSpecNote');
+fetch('/data/futures-contracts.json').then(r => r.json()).then(data => {
+  futuresContracts = data.contracts;
+  fSymbolSelect.innerHTML = futuresContracts.map(c => `<option value="${c.symbol}">${c.symbol} — ${c.name}</option>`).join('');
+  updateFuturesSpecNote();
+});
+fSymbolSelect.addEventListener('change', updateFuturesSpecNote);
+function updateFuturesSpecNote() {
+  const c = futuresContracts.find(x => x.symbol === fSymbolSelect.value);
+  if (c) fSpecNote.textContent = `${c.symbol}: tick ${c.tick_size_points}pt = $${c.tick_value_usd.toFixed(2)} | $${c.point_value_usd.toFixed(2)} per full point.`;
+}
+document.getElementById('calc-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const c = futuresContracts.find(x => x.symbol === fSymbolSelect.value);
+  if (!c) return;
+  const entryPrice = document.getElementById('entryPrice').value;
+  const exitPrice = document.getElementById('exitPrice').value;
+  const numContracts = document.getElementById('numContracts').value;
+  const priceMovePoints = Number(exitPrice) - Number(entryPrice);
+  const r = tickValue({ priceMovePoints, tickSizePoints: c.tick_size_points, tickValueUsd: c.tick_value_usd, contracts: numContracts });
+  document.getElementById('r-total').textContent = fmtUSD(r.totalDollars);
+  document.getElementById('r-move').textContent = fmtNum(priceMovePoints, 2);
+  document.getElementById('r-ticks').textContent = fmtNum(r.ticks, 2);
+  document.getElementById('r-percontract').textContent = fmtUSD(r.dollarsPerContract);
+  document.getElementById('results-block').classList.add('visible');
+});
+</script>
+</main>
+<footer>
+<div class="footer-groups">
+<div>
+<p class="footer-heading">Calculators</p>
+<ul>
+<li><a href="/">Position Size Calculator</a></li>
+<li><a href="/futures-calculator/">Futures Calculator</a></li>
+</ul>
+</div>
+<div>
+<p class="footer-heading">Futures contract specs</p>
+<ul>
+<li><a href="/tick-value/es/">ES Tick Value</a></li>
+<li><a href="/tick-value/mes/">MES Tick Value</a></li>
+<li><a href="/tick-value/nq/">NQ Tick Value</a></li>
+<li><a href="/tick-value/mnq/">MNQ Tick Value</a></li>
+<li><a href="/tick-value/ym/">YM Tick Value</a></li>
+<li><a href="/tick-value/mym/">MYM Tick Value</a></li>
+<li><a href="/tick-value/rty/">RTY Tick Value</a></li>
+<li><a href="/tick-value/m2k/">M2K Tick Value</a></li>
+</ul>
+</div>
+<div>
+<p class="footer-heading">Site</p>
+<ul>
+<li><a href="/about/">About &amp; methodology</a></li>
+<li><a href="/privacy/">Privacy</a></li>
+<li><a href="/changelog/">Changelog</a></li>
+</ul>
+</div>
+</div>
+<p class="footer-legal">TradeRiskTools is published by Gesmine-Invest Limited, registered UK company number 14120136, registered office at Hardy House, 269 Poynders Gardens, London, United Kingdom, SW4 8PQ. &copy; 2026 TradeRiskTools. Estimates only — not trading or financial advice.</p>
+</footer>
+<script src="/assets/calc-engine.js"></script>
+<script src="/assets/affiliate-widget.js"></script>
+</body>
+</html>

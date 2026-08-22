@@ -1,0 +1,86 @@
+{
+  "last_updated": "2026-08-22",
+  "note": "Tick size, tick value, and point multiplier verified against CME Group contract specs (via NinjaTrader/Ironbeam/CME-sourced spec summaries) on 2026-08-22, not from memory. Wave 1 only — micro/mini index contracts, the instruments prop-firm platforms (Topstep/Apex-style) commonly allow.",
+  "contracts": [
+    {
+      "symbol": "ES",
+      "name": "E-mini S&P 500",
+      "exchange": "CME",
+      "category": "Equity Index",
+      "tick_size_points": 0.25,
+      "tick_value_usd": 12.50,
+      "point_value_usd": 50.00,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    },
+    {
+      "symbol": "MES",
+      "name": "Micro E-mini S&P 500",
+      "exchange": "CME",
+      "category": "Equity Index",
+      "tick_size_points": 0.25,
+      "tick_value_usd": 1.25,
+      "point_value_usd": 5.00,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    },
+    {
+      "symbol": "NQ",
+      "name": "E-mini Nasdaq-100",
+      "exchange": "CME",
+      "category": "Equity Index",
+      "tick_size_points": 0.25,
+      "tick_value_usd": 5.00,
+      "point_value_usd": 20.00,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    },
+    {
+      "symbol": "MNQ",
+      "name": "Micro E-mini Nasdaq-100",
+      "exchange": "CME",
+      "category": "Equity Index",
+      "tick_size_points": 0.25,
+      "tick_value_usd": 0.50,
+      "point_value_usd": 2.00,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    },
+    {
+      "symbol": "YM",
+      "name": "E-mini Dow",
+      "exchange": "CBOT",
+      "category": "Equity Index",
+      "tick_size_points": 1,
+      "tick_value_usd": 5.00,
+      "point_value_usd": 5.00,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    },
+    {
+      "symbol": "MYM",
+      "name": "Micro E-mini Dow",
+      "exchange": "CBOT",
+      "category": "Equity Index",
+      "tick_size_points": 1,
+      "tick_value_usd": 0.50,
+      "point_value_usd": 0.50,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    },
+    {
+      "symbol": "RTY",
+      "name": "E-mini Russell 2000",
+      "exchange": "CME",
+      "category": "Equity Index",
+      "tick_size_points": 0.10,
+      "tick_value_usd": 5.00,
+      "point_value_usd": 50.00,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    },
+    {
+      "symbol": "M2K",
+      "name": "Micro E-mini Russell 2000",
+      "exchange": "CME",
+      "category": "Equity Index",
+      "tick_size_points": 0.10,
+      "tick_value_usd": 0.50,
+      "point_value_usd": 5.00,
+      "typical_day_margin_note": "Intraday margin set by broker/prop-firm, varies — not a fixed CME figure. Check your platform."
+    }
+  ]
+}
