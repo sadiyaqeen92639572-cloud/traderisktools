@@ -4,7 +4,7 @@ Trading-risk calculator hub — position sizing (stocks/forex/futures), futures
 P&L, and per-contract futures tick-value pages. Built for retail and
 prop-firm funded traders.
 
-Domain: traderisktools.com (chosen 2026-08-22, **not yet registered**).
+Domain: traderisktools.com (registered + live 2026-08-22).
 
 ## What it does
 
@@ -41,6 +41,12 @@ editing that JSON file only, never hardcode a firm into a page template.
 Given 80+ prop-firm closures 2023-2026, review this list quarterly.
 `providers.json` currently ships with placeholder (`active: false`) entries —
 replace with real affiliate programs before launch.
+
+## Free Companion Tools
+
+[Risk/Reward Ratio Calculator](https://sadiyaqeen92639572-cloud.github.io/risk-reward-ratio-calculator/) —
+quick entry/stop/target → R:R ratio and breakeven win rate checker. Powered by
+traderisktools.com's full position size and futures calculators.
 
 ## Contract data
 
