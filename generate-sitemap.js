@@ -3,7 +3,8 @@ const DOMAIN = 'https://traderisktools.com';
 const contractData = require('./data/futures-contracts.json');
 
 const paths = [
-  '/', '/futures-calculator/', '/about/', '/privacy/', '/changelog/',
+  '/', '/futures-calculator/', '/points-to-ticks-calculator/',
+  '/about/', '/privacy/', '/changelog/',
   ...contractData.contracts.map(c => `/tick-value/${c.symbol.toLowerCase()}/`)
 ];
 

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const assert = require('assert');
 
 const DOMAIN = 'https://traderisktools.com';
 const LAST_REVIEWED = '2026-08-22';
@@ -23,7 +24,8 @@ const ORG = {
 
 const NAV_LINKS = [
   { href: '/', label: 'Position Size' },
-  { href: '/futures-calculator/', label: 'Futures Calculator' }
+  { href: '/futures-calculator/', label: 'Futures Calculator' },
+  { href: '/points-to-ticks-calculator/', label: 'Points ↔ Ticks' }
 ];
 
 function webApp(fields) {
@@ -85,6 +87,7 @@ ${bodyHtml}
 <ul>
 <li><a href="/">Position Size Calculator</a></li>
 <li><a href="/futures-calculator/">Futures Calculator</a></li>
+<li><a href="/points-to-ticks-calculator/">Points to Ticks Calculator</a></li>
 </ul>
 </div>
 <div>
@@ -234,6 +237,215 @@ document.getElementById('calc-form').addEventListener('submit', (e) => {
   }));
 }
 
+// ---- points-to-ticks converter ----
+{
+  // Prose, table and FAQ numbers are all derived from data/futures-contracts.json
+  // via these helpers — never typed as literals, so they cannot silently drift.
+  const bySym = s => contractData.contracts.find(c => c.symbol === s);
+  const tpp = ts => +(1 / ts).toFixed(6);           // ticks per point (0.1 -> 10, not 9.999…)
+  const ticksFor = (sym, pts) => pts / bySym(sym).tick_size_points;
+  const dollarsFor = (sym, pts) => ticksFor(sym, pts) * bySym(sym).tick_value_usd;
+  const fmtMoney = n => '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+  // Build-time guard: the worked examples cited on the page must match the data
+  // file. A JSON edit that changes any of these fails the build loudly instead
+  // of shipping a page whose examples contradict its own table.
+  assert.deepStrictEqual(
+    {
+      nq20: [ticksFor('NQ', 20), dollarsFor('NQ', 20)],
+      nq50: [ticksFor('NQ', 50), dollarsFor('NQ', 50)],
+      mnq20: [ticksFor('MNQ', 20), dollarsFor('MNQ', 20)]
+    },
+    { nq20: [80, 400], nq50: [200, 1000], mnq20: [80, 40] },
+    'points-to-ticks worked examples diverge from data/futures-contracts.json'
+  );
+
+  const nqTick = bySym('NQ').tick_size_points;
+  const nqTpp = tpp(nqTick);
+  const tppRows = contractData.contracts.map(c =>
+    `<tr><td>${c.symbol}</td><td>${c.tick_size_points}</td><td>${tpp(c.tick_size_points)}</td></tr>`
+  ).join('\n');
+
+  const body = `
+<div class="disclaimer-banner">Tick size is fixed by the exchange (CME/CBOT). This converter is deterministic arithmetic — not trading or financial advice.</div>
+<form id="calc-form">
+  <label>Contract
+    <select id="convSymbol"></select>
+  </label>
+  <p class="privacy-note" id="convSpecNote"></p>
+  <label>Value <input type="number" id="convValue" value="20"></label>
+  <label>Unit
+    <select id="convUnit">
+      <option value="points">Points</option>
+      <option value="ticks">Ticks</option>
+    </select>
+  </label>
+  <label>Number of contracts <input type="number" id="convContracts" value="1" min="1" step="1"></label>
+  <button type="submit" class="submit-btn">Convert</button>
+</form>
+<div id="results-block">
+  <div class="result-amount" id="r-converted">0</div>
+  <div class="result-row"><span>Ticks per point</span><span id="r-tpp">0</span></div>
+  <div class="result-row"><span>$ per tick</span><span id="r-pertick">$0</span></div>
+  <div class="result-row"><span>$ per point</span><span id="r-perpoint">$0</span></div>
+  <div class="result-row"><span>Value of this move, per contract</span><span id="r-permove">$0</span></div>
+  <div class="result-row"><span>Value across all contracts</span><span id="r-total">$0</span></div>
+</div>
+<section>
+<h2>Ticks per point, by contract</h2>
+<table>
+<tr><th>Contract</th><th>Tick size (points)</th><th>Ticks per point</th></tr>
+${tppRows}
+</table>
+<p class="formula-footnote">Ticks per point = 1 ÷ tick size. Dollar-per-tick and dollar-per-point figures for each symbol are on the <a href="/tick-value/nq/">tick-value pages</a>.</p>
+</section>
+<section>
+<h2>Worked examples</h2>
+<h3>How many ticks is 20 points on NQ?</h3>
+<p>20 points on NQ (E-mini Nasdaq-100) is ${ticksFor('NQ', 20)} ticks — tick size is ${nqTick} points, so ${nqTpp} ticks per point. That move is worth ${fmtMoney(dollarsFor('NQ', 20))} per contract.</p>
+<h3>How many ticks is 50 points on NQ?</h3>
+<p>50 points on NQ is ${ticksFor('NQ', 50)} ticks, worth ${fmtMoney(dollarsFor('NQ', 50))} per contract.</p>
+<h3>How many ticks is 20 points on MNQ?</h3>
+<p>MNQ (Micro E-mini Nasdaq-100) has the same ${bySym('MNQ').tick_size_points}-point tick size as NQ, so 20 points is also ${ticksFor('MNQ', 20)} ticks — but at the micro tick value that move is worth ${fmtMoney(dollarsFor('MNQ', 20))} per contract.</p>
+<h3>How many ticks per point on NQ, MNQ and ES?</h3>
+<p>All three have a ${nqTick}-point tick, so ${nqTpp} ticks per point. YM and MYM have a 1-point tick (1 tick per point); RTY and M2K have a 0.1-point tick (10 ticks per point).</p>
+</section>
+<section class="formula-section">
+<h2>How to convert points to ticks</h2>
+<p class="source-line">Deterministic math — no AI, no estimation model.</p>
+<div class="formula-code">
+ticks = points ÷ tick_size_points<br>
+points = ticks × tick_size_points<br>
+dollars = ticks × tick_value_usd
+</div>
+<p class="formula-footnote">Need entry/exit P&amp;L instead? Use the <a href="/futures-calculator/">futures calculator</a>. Sizing the position first? Use the <a href="/">position size calculator</a>.</p>
+</section>
+<section id="affiliate-widget"></section>
+<section>
+<h2>FAQ</h2>
+<h3>How do you convert points to ticks?</h3>
+<p>Divide the point move by the contract's tick size in points. NQ has a ${nqTick}-point tick, so 20 points ÷ ${nqTick} = ${ticksFor('NQ', 20)} ticks. To go the other way, multiply ticks by the tick size.</p>
+<h3>How many ticks is one point?</h3>
+<p>It depends on the contract. ES, MES, NQ and MNQ have a 0.25-point tick, so 4 ticks per point. YM and MYM have a 1-point tick, so 1 tick per point. RTY and M2K have a 0.1-point tick, so 10 ticks per point.</p>
+<h3>How many ticks is 20 points on NQ?</h3>
+<p>${ticksFor('NQ', 20)} ticks, worth ${fmtMoney(dollarsFor('NQ', 20))} per contract.</p>
+<h3>How many ticks is 50 points on NQ?</h3>
+<p>${ticksFor('NQ', 50)} ticks, worth ${fmtMoney(dollarsFor('NQ', 50))} per contract.</p>
+<h3>What is a tick in futures trading?</h3>
+<p>A tick is the smallest price increment a futures contract can move. Each tick has a fixed dollar value set by the exchange, so ticks — not percentage moves — are how futures P&amp;L is measured.</p>
+</section>
+<script>
+let convContracts = [];
+const cSymbol = document.getElementById('convSymbol');
+const cUnit = document.getElementById('convUnit');
+const cValue = document.getElementById('convValue');
+const cSpecNote = document.getElementById('convSpecNote');
+
+fetch('/data/futures-contracts.json').then(r => r.json()).then(data => {
+  convContracts = data.contracts;
+  cSymbol.innerHTML = convContracts.map(c => \`<option value="\${c.symbol}">\${c.symbol} — \${c.name}</option>\`).join('');
+  updateSpecNote();
+  setStep();
+}).catch(() => {
+  cSpecNote.textContent = 'Contract data unavailable — reload the page.';
+});
+
+function currentContract() { return convContracts.find(x => x.symbol === cSymbol.value); }
+
+function updateSpecNote() {
+  const c = currentContract();
+  if (!c) return;
+  const ratio = 1 / c.tick_size_points;
+  cSpecNote.textContent = \`\${c.symbol}: \${c.tick_size_points}pt tick = \${fmtNum(ratio, 2)} ticks/point | $\${c.tick_value_usd.toFixed(2)}/tick | $\${c.point_value_usd.toFixed(2)}/point.\`;
+}
+
+function setStep() {
+  const c = currentContract();
+  if (!c) return;
+  cValue.step = cUnit.value === 'ticks' ? 1 : c.tick_size_points;
+}
+
+function recompute() {
+  if (document.getElementById('results-block').classList.contains('visible')) runConvert();
+}
+
+cSymbol.addEventListener('change', () => { updateSpecNote(); setStep(); recompute(); });
+cUnit.addEventListener('change', () => {
+  const c = currentContract();
+  if (c) {
+    const v = Number(cValue.value) || 0;
+    // Convert the field value into the newly-selected unit. Only IEEE-754 noise
+    // is stripped (toFixed(10)) — the value itself is never rounded, since that
+    // would silently change the user's own input and diverge the next result.
+    const converted = cUnit.value === 'ticks' ? v / c.tick_size_points : v * c.tick_size_points;
+    cValue.value = Number(converted.toFixed(10));
+  }
+  setStep();
+  recompute();
+});
+
+function runConvert() {
+  const c = currentContract();
+  if (!c) return;
+  const v = Number(cValue.value) || 0;
+  const contracts = Number(document.getElementById('convContracts').value) || 1;
+  const isPoints = cUnit.value === 'points';
+  const priceMovePoints = isPoints ? v : v * c.tick_size_points;
+  const r = tickValue({ priceMovePoints, tickSizePoints: c.tick_size_points, tickValueUsd: c.tick_value_usd, contracts });
+  const convertedVal = isPoints ? r.ticks : priceMovePoints;
+  const convertedUnit = isPoints ? 'ticks' : 'points';
+  document.getElementById('r-converted').textContent = fmtNum(convertedVal, 4) + ' ' + convertedUnit;
+  document.getElementById('r-tpp').textContent = fmtNum(1 / c.tick_size_points, 2);
+  document.getElementById('r-pertick').textContent = fmtUSD(c.tick_value_usd);
+  document.getElementById('r-perpoint').textContent = fmtUSD(c.point_value_usd);
+  document.getElementById('r-permove').textContent = fmtUSD(r.dollarsPerContract);
+  document.getElementById('r-total').textContent = fmtUSD(r.totalDollars);
+  document.getElementById('results-block').classList.add('visible');
+}
+
+document.getElementById('calc-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!convContracts.length) return;
+  runConvert();
+});
+</script>`;
+
+  const faq = faqJsonLd([
+    ['How do you convert points to ticks?', `Divide the point move by the contract's tick size in points. NQ has a ${nqTick}-point tick, so 20 points ÷ ${nqTick} = ${ticksFor('NQ', 20)} ticks. To go the other way, multiply ticks by the tick size.`],
+    ['How many ticks is one point?', 'It depends on the contract. ES, MES, NQ and MNQ have a 0.25-point tick, so 4 ticks per point. YM and MYM have a 1-point tick, so 1 tick per point. RTY and M2K have a 0.1-point tick, so 10 ticks per point.'],
+    ['How many ticks is 20 points on NQ?', `${ticksFor('NQ', 20)} ticks, worth ${fmtMoney(dollarsFor('NQ', 20))} per contract.`],
+    ['How many ticks is 50 points on NQ?', `${ticksFor('NQ', 50)} ticks, worth ${fmtMoney(dollarsFor('NQ', 50))} per contract.`],
+    ['What is a tick in futures trading?', 'A tick is the smallest price increment a futures contract can move. Each tick has a fixed dollar value set by the exchange, so ticks — not percentage moves — are how futures P&L is measured.']
+  ]);
+  const jsonLd = { '@context': 'https://schema.org', '@graph': [
+    webApp({ name: 'Points to Ticks Calculator', description: 'Converts index points to ticks and back for ES, MES, NQ, MNQ, YM, MYM, RTY and M2K futures, with the dollar value of the move per contract.' }),
+    faq,
+    howToJsonLd(
+      'How to convert points to ticks',
+      'Pick your contract, enter a value, choose whether it is points or ticks, and read the converted figure plus its dollar value.',
+      [
+        { name: 'Pick your contract', text: 'Select the futures symbol (ES, MES, NQ, MNQ, YM, MYM, RTY, or M2K).' },
+        { name: 'Enter a value', text: 'Type the number you want to convert.' },
+        { name: 'Choose the unit', text: 'Set the unit to Points or Ticks — that is the unit of the number you entered.' },
+        { name: 'Read the result', text: 'The converter shows the value in the other unit, the ticks-per-point ratio, and the dollar value of the move per contract and across all your contracts.' }
+      ]
+    ),
+    { '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: DOMAIN + '/' },
+      { '@type': 'ListItem', position: 2, name: 'Points to Ticks Calculator', item: DOMAIN + '/points-to-ticks-calculator/' }
+    ]},
+    ORG
+  ]};
+  write('points-to-ticks-calculator', layout({
+    title: 'Points to Ticks Calculator — Convert Futures Points & Ticks',
+    description: 'Convert index points to ticks and back for ES, MES, NQ, MNQ, YM, MYM, RTY, M2K futures — with tick value in dollars. E.g. 20 points on NQ = 80 ticks = $400 per contract.',
+    canonicalPath: '/points-to-ticks-calculator/',
+    h1: 'Points to Ticks Calculator',
+    subtitle: 'Convert points ↔ ticks for any index futures contract, with dollar value.',
+    jsonLd, bodyHtml: body
+  }));
+}
+
 // ---- Wave-1 per-symbol tick-value pages ----
 for (const c of contractData.contracts) {
   const slug = c.symbol.toLowerCase();
@@ -259,6 +471,7 @@ for (const c of contractData.contracts) {
 <section>
 <h2>Calculate your trade</h2>
 <p>Use the full <a href="/futures-calculator/">futures calculator</a> to plug in your entry/exit price and contract count for ${c.symbol}, or the <a href="/">position size calculator</a> to figure out how many ${c.symbol} contracts to trade for a given account risk.</p>
+<p>Just need to convert a price move on ${c.symbol} into ticks or dollars? Use the <a href="/points-to-ticks-calculator/">points to ticks calculator</a>.</p>
 </section>
 <section id="affiliate-widget"></section>`;
   const jsonLd = { '@context': 'https://schema.org', '@graph': [
