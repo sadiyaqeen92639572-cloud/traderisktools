@@ -63,7 +63,7 @@
 <tr><td>RTY</td><td>0.1</td><td>10</td></tr>
 <tr><td>M2K</td><td>0.1</td><td>10</td></tr>
 </table>
-<p class="formula-footnote">Ticks per point = 1 ÷ tick size. Dollar-per-tick and dollar-per-point figures for each symbol are on the <a href="/tick-value/nq/">tick-value pages</a>.</p>
+<p class="formula-footnote">Ticks per point = 1 ÷ tick size. Tick sizes are the exchange-set values (CME/CBOT) from this site's contract-spec data, verified against CME contract specifications and updated 2026-08-22. Dollar-per-tick and dollar-per-point figures for each symbol are on the <a href="/tick-value/nq/">tick-value pages</a>.</p>
 </section>
 <section>
 <h2>Worked examples</h2>
@@ -76,9 +76,13 @@
 <h3>How many ticks per point on NQ, MNQ and ES?</h3>
 <p>All three have a 0.25-point tick, so 4 ticks per point. YM and MYM have a 1-point tick (1 tick per point); RTY and M2K have a 0.1-point tick (10 ticks per point).</p>
 </section>
+<section>
+<h2>Related calculators</h2>
+<p>Once you know the tick or dollar size of a move, the <a href="/futures-calculator/">futures calculator</a> turns an entry and exit price into full profit/loss, and the <a href="/">position size calculator</a> works out how many contracts to trade for a set account risk. Per-contract tick size, tick value and point value for each symbol are on the <a href="/tick-value/mnq/">tick-value pages</a>.</p>
+</section>
 <section class="formula-section">
 <h2>How to convert points to ticks</h2>
-<p class="source-line">Deterministic math — no AI, no estimation model.</p>
+<p class="source-line">Deterministic math — no AI, no estimation model. Formulas below.</p>
 <div class="formula-code">
 ticks = points ÷ tick_size_points<br>
 points = ticks × tick_size_points<br>
