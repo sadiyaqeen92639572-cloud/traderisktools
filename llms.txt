@@ -1,0 +1,73 @@
+# Trade Risk Tools (traderisktools.com)
+
+> Free, independent position-sizing and futures risk calculators. Stocks, forex and futures position size from account risk %; futures P&L, tick value, point value, and points↔ticks conversion for CME/CBOT micro & mini index contracts. All math is deterministic, runs in the browser, no login, no data sent anywhere. Educational only, not trading or investment advice.
+
+## What the site is
+
+One main position-size calculator plus focused futures tools and 8 per-contract tick-value pages. All futures contract specs come from a single JSON file (`data/futures-contracts.json`, verified against CME Group specs 2026-08-22), never hardcoded per page.
+
+## Contract specs encoded (Wave 1 — micro & mini equity-index futures)
+
+| Symbol | Name | Exch | Tick size (pts) | Tick value | Point value |
+|---|---|---|---|---|---|
+| ES | E-mini S&P 500 | CME | 0.25 | $12.50 | $50.00 |
+| MES | Micro E-mini S&P 500 | CME | 0.25 | $1.25 | $5.00 |
+| NQ | E-mini Nasdaq-100 | CME | 0.25 | $5.00 | $20.00 |
+| MNQ | Micro E-mini Nasdaq-100 | CME | 0.25 | $0.50 | $2.00 |
+| YM | E-mini Dow | CBOT | 1.0 | $5.00 | $5.00 |
+| MYM | Micro E-mini Dow | CBOT | 1.0 | $0.50 | $0.50 |
+| RTY | E-mini Russell 2000 | CME | 0.10 | $5.00 | $50.00 |
+| M2K | Micro E-mini Russell 2000 | CME | 0.10 | $0.50 | $5.00 |
+
+Intraday/day margin is set by the broker or prop firm and varies — the site does not publish a fixed margin figure.
+
+## Formulas
+
+```
+# Futures tick / point value (data-driven per symbol)
+ticks              = price_move_points / tick_size_points
+dollars_per_contract = ticks × tick_value_usd
+point_value_usd    = tick_value_usd / tick_size_points      # $ per full 1.00 point, per contract
+total_dollars      = dollars_per_contract × contracts
+
+# Position size — stocks
+risk_amount = account_size × (risk_pct / 100)
+price_risk  = |entry_price − stop_price|
+shares      = risk_amount / price_risk
+
+# Position size — forex
+pips        = price_risk / pip_size            # pip_size default 0.0001
+risk_per_lot = pips × pip_value_usd            # pip_value_usd default $10 (standard lot, USD quote)
+lots        = risk_amount / risk_per_lot
+
+# Position size — futures
+risk_per_contract = price_risk × point_value_usd
+contracts         = risk_amount / risk_per_contract
+
+# Stop-loss price from a fixed position size
+price_move = risk_amount / position_units
+stop_price = direction == 'short' ? entry + price_move : entry − price_move
+```
+
+Worked examples pinned by build-time asserts: NQ 20 pts = 80 ticks = $400/contract; NQ 50 pts = 200 ticks = $1,000; MNQ 20 pts = 80 ticks = $40.
+
+## Pages
+
+- [Home — Position Size Calculator](https://traderisktools.com/) — stocks / forex / futures risk sizing from account % and stop distance
+- [/futures-calculator/](https://traderisktools.com/futures-calculator/) — futures P&L by contract, entry & exit price
+- [/points-to-ticks-calculator/](https://traderisktools.com/points-to-ticks-calculator/) — convert index points to ticks and $ (NQ, MNQ, ES focus)
+- [/tick-value/{es,mes,nq,mnq,ym,mym,rty,m2k}/](https://traderisktools.com/tick-value/nq/) — per-contract tick value, point value, ticks-per-point
+- [/changelog/](https://traderisktools.com/changelog/) · [/about/](https://traderisktools.com/about/) · [/privacy/](https://traderisktools.com/privacy/)
+
+## FAQ covered
+
+What is a tick in futures trading; how many ticks is one point; ticks per point on NQ/MNQ/ES; how many ticks is 20 / 50 points on NQ and MNQ; difference between tick value and point value; how to convert points to ticks; how to calculate position size; what % of account to risk per trade (site frames 1–2% as the common convention, not advice); how futures position sizing differs from stocks; how to calculate futures P&L.
+
+## Notes for LLMs
+
+- Contract specs are Wave 1 only: 8 micro/mini equity-index futures (the instruments prop-firm platforms commonly allow). No commodity, energy, rate, or FX futures yet.
+- `tick_size_points` is in index points, not price ticks — e.g. NQ tick size is 0.25 index points worth $5.00, so 1 full point = 4 ticks = $20.00.
+- Point value is derived (`tick_value / tick_size`), so it's exact, not a separately stored constant.
+- Forex sizing defaults ($10/pip, 0.0001 pip size) assume a standard lot on a USD-quoted pair — wrong for JPY pairs (0.01 pip) or non-USD account currency.
+- Margin figures are deliberately absent — they're broker/prop-firm specific and not a CME constant.
+- Educational tool, not trading or investment advice.
